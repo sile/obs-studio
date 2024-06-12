@@ -294,7 +294,6 @@ void WHEPSource::OnFrameVideo(rtc::binary msg, rtc::FrameInfo frame_info)
 	if (naluType == naluTypeSPS || naluType == naluTypePPS) {
 		std::move(msg.begin(), msg.end(),
 			  std::back_inserter(sps_and_pps));
-		return;
 	} else if (this->sps_and_pps.size() != 0) {
 		std::copy(this->sps_and_pps.begin(), this->sps_and_pps.end(),
 			  std::back_inserter(msg));
@@ -381,7 +380,7 @@ void WHEPSource::SetupPeerConnection()
 
 	auto audio_depacketizer = std::make_shared<rtc::OpusRtpDepacketizer>();
 	auto audio_session = std::make_shared<rtc::RtcpReceivingSession>();
-	audio_session->addToChain(audio_depacketizer);
+	audio_depacketizer->addToChain(audio_session);
 	audio_track->setMediaHandler(audio_depacketizer);
 	audio_track->onFrame([&](rtc::binary msg, rtc::FrameInfo frame_info) {
 		this->OnFrameAudio(msg, frame_info);
@@ -394,7 +393,7 @@ void WHEPSource::SetupPeerConnection()
 
 	auto video_depacketizer = std::make_shared<rtc::H264RtpDepacketizer>();
 	auto video_session = std::make_shared<rtc::RtcpReceivingSession>();
-	video_session->addToChain(video_depacketizer);
+	video_depacketizer->addToChain(video_session);
 	video_track->setMediaHandler(video_depacketizer);
 	video_track->onFrame([&](rtc::binary msg, rtc::FrameInfo frame_info) {
 		this->OnFrameVideo(msg, frame_info);
